@@ -5,7 +5,7 @@ from tqdm import tqdm
 import grapher
 
 NUM_CLASSES = 5
-STEP_SIZE = 0.03
+STEP_SIZE = 0.01  # Reduced learning rate for the different data characteristics
 NUM_EPOCHS = 100
 
 
@@ -22,15 +22,15 @@ def progress_iter(it, desc):
                 bar_format="{desc}: {percentage:0.2f}%|{bar}| {n_fmt}/{total_fmt} [{elapsed} < {remaining}]")
 
 
-with open('data/concrete-strength.csv', 'r') as file:
+with open('dataset/cleaned_used_car_price_dataset.csv', 'r') as file:
     reader = csv.reader(file)
     header = next(reader)
     data = list(reader)
     print(f"Data size: {len(data)}")
     random.shuffle(data)
     for r in data:
-        all_x.append([float(i) for i in r[:-1]])
-        all_y.append(float(r[-1]))
+        all_x.append([float(i) for i in r[:-1]])  # All features except the last one (price)
+        all_y.append(float(r[-1]))  # Last column is the target (price)
 print(f"Input size: {len(all_x[0])}")
 
 SAMPLE_SIZE = len(all_y)
@@ -40,7 +40,8 @@ train_y = all_y[:TRAIN_SPLIT]
 valid_x = all_x[TRAIN_SPLIT:]
 valid_y = all_y[TRAIN_SPLIT:]
 
-nn = anndy.MLP((8, "tanh"), (16, "relu"), (8, "tanh"), (2, "relu"), (1, "relu"))
+# Updated network architecture for 19 input features
+nn = anndy.MLP((19, "tanh"), (32, "relu"), (16, "tanh"), (8, "relu"), (1, "relu"))
 
 parameters = nn.get_parameters()
 print(f"Parameters: {len(parameters)}")
