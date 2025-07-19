@@ -6,7 +6,7 @@ import grapher
 
 NUM_CLASSES = 5
 STEP_SIZE = 0.01  # Reduced learning rate for the different data characteristics
-NUM_EPOCHS = 100
+NUM_EPOCHS = 50
 
 
 all_x = []

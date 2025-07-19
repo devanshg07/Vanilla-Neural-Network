@@ -158,8 +158,6 @@ wandb/
 # Data files (if you don't want to track large datasets)
 # Uncomment if you don't want to track data files
 # *.csv
-# data/
-# dataset/
 
 # Graph outputs
 *.png
