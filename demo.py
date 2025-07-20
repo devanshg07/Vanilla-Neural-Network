@@ -1,5 +1,5 @@
 import neuron
-import math, random, sys, csv
+import math, random, sys, csv, pickle
 from matplotlib import pyplot
 from tqdm import tqdm
 
@@ -47,6 +47,7 @@ print(f"Parameters: {len(parameters)}")
 
 train_losses = []
 valid_losses = []
+best_valid_error = float('inf')
 
 for i in range(NUM_EPOCHS):
     epoch_x, epoch_y = zip(*random.sample(list(zip(all_x, all_y)), SAMPLE_SIZE))
@@ -73,6 +74,13 @@ for i in range(NUM_EPOCHS):
     pyplot.legend(["Training Error", "Validation Error"])
     pyplot.pause(0.001)
     print(f"\tValidation Error: {valid_abs_error}")
+
+    # Save the model if it's the best so far
+    if valid_abs_error < best_valid_error:
+        best_valid_error = valid_abs_error
+        with open('best_model.pkl', 'wb') as f:
+            pickle.dump(nn, f)
+        print(f"\tBest model saved with validation error: {best_valid_error}")
 
 train_pred_y = [nn(x) for x in train_x]
 train_loss = neuron.mean_squared_error(train_y, train_pred_y)
