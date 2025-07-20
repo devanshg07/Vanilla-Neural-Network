@@ -1,11 +1,11 @@
 import neuron
-import math, random, sys, csv, pickle
+import math, random, sys, csv, dill
 from matplotlib import pyplot
 from tqdm import tqdm
 
 NUM_CLASSES = 5
-STEP_SIZE = 0.01
-NUM_EPOCHS = 100
+STEP_SIZE = 0.005
+NUM_EPOCHS = 50
 
 all_x = []
 all_y = []
@@ -79,7 +79,7 @@ for i in range(NUM_EPOCHS):
     if valid_abs_error < best_valid_error:
         best_valid_error = valid_abs_error
         with open('best_model.pkl', 'wb') as f:
-            pickle.dump(nn, f)
+            dill.dump(nn, f)
         print(f"\tBest model saved with validation error: {best_valid_error}")
 
 train_pred_y = [nn(x) for x in train_x]
