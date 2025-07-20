@@ -4,7 +4,7 @@ from matplotlib import pyplot
 from tqdm import tqdm
 
 NUM_CLASSES = 5
-STEP_SIZE = 0.005
+STEP_SIZE = 0.001
 NUM_EPOCHS = 50
 
 all_x = []
@@ -74,13 +74,12 @@ for i in range(NUM_EPOCHS):
     pyplot.legend(["Training Error", "Validation Error"])
     pyplot.pause(0.001)
     print(f"\tValidation Error: {valid_abs_error}")
+    # No model saving here
 
-    # Save the model if it's the best so far
-    if valid_abs_error < best_valid_error:
-        best_valid_error = valid_abs_error
-        with open('best_model.pkl', 'wb') as f:
-            dill.dump(nn, f)
-        print(f"\tBest model saved with validation error: {best_valid_error}")
+# After all epochs, save the final model
+with open('best_model.pkl', 'wb') as f:
+    dill.dump(nn, f)
+print(f"Model saved after {NUM_EPOCHS} epochs.")
 
 train_pred_y = [nn(x) for x in train_x]
 train_loss = neuron.mean_squared_error(train_y, train_pred_y)
