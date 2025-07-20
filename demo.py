@@ -2,16 +2,13 @@ import neuron
 import math, random, sys, csv
 from matplotlib import pyplot
 from tqdm import tqdm
-import grapher
 
 NUM_CLASSES = 5
-STEP_SIZE = 0.01  # Reduced learning rate for the different data characteristics
+STEP_SIZE = 0.01
 NUM_EPOCHS = 100
-
 
 all_x = []
 all_y = []
-
 
 def progress_iter(it, desc):
     return tqdm(range(len(it)),
@@ -21,7 +18,6 @@ def progress_iter(it, desc):
                 colour="GREEN",
                 bar_format="{desc}: {percentage:0.2f}%|{bar}| {n_fmt}/{total_fmt} [{elapsed} < {remaining}]")
 
-
 with open('dataset/Student_performance_data.csv', 'r') as file:
     reader = csv.reader(file)
     header = next(reader)
@@ -29,11 +25,11 @@ with open('dataset/Student_performance_data.csv', 'r') as file:
     print(f"Data size: {len(data)}")
     random.shuffle(data)
     for r in data:
-        # Features: Age, Ethnicity, StudyTimeWeekly, Absences, TotalActivities
-        # Skip StudentID (first column) and exclude GPA (target)
-        features = [float(i) for i in r[1:-1]]  # Skip StudentID, exclude GPA
+        # New order: Age, StudyTimeWeekly, Absences, GPA, TotalActivities
+        # Input features: Age, StudyTimeWeekly, Absences, TotalActivities
+        features = [float(r[0]), float(r[1]), float(r[2]), float(r[4])]
         all_x.append(features)
-        all_y.append(float(r[-1]))  # GPA is the last column
+        all_y.append(float(r[3]))  # GPA is now the 4th column
 print(f"Input size: {len(all_x[0])}")
 
 SAMPLE_SIZE = len(all_y)
@@ -43,8 +39,8 @@ train_y = all_y[:TRAIN_SPLIT]
 valid_x = all_x[TRAIN_SPLIT:]
 valid_y = all_y[TRAIN_SPLIT:]
 
-# Network architecture for 5 input features
-nn = neuron.MLP((5, "tanh"), (32, "relu"), (16, "tanh"), (8, "relu"), (1, "relu"))
+# Network architecture for 4 input features
+nn = neuron.MLP((4, "tanh"), (32, "relu"), (16, "tanh"), (8, "relu"), (1, "relu"))
 
 parameters = nn.get_parameters()
 print(f"Parameters: {len(parameters)}")
@@ -53,38 +49,30 @@ train_losses = []
 valid_losses = []
 
 for i in range(NUM_EPOCHS):
-
-    # Create random mini-batch
     epoch_x, epoch_y = zip(*random.sample(list(zip(all_x, all_y)), SAMPLE_SIZE))
 
-
     print(f"\nEpoch: {i}")
-    train_pred_y = [nn(train_x[i]) for i in progress_iter(train_x, "Forward Pass")]  # Forward pass
+    train_pred_y = [nn(train_x[i]) for i in progress_iter(train_x, "Forward Pass")]
     train_loss = neuron.mean_squared_error(train_y, train_pred_y)
     train_abs_error = neuron.mean_abs_error(train_y, train_pred_y)
 
     print(f"\tTraining Error: {train_abs_error}")
 
     nn.zero_grad()
-    train_loss.backward()  # Backward pass
+    train_loss.backward()
     nn.nudge(STEP_SIZE)
 
-    # VALIDATION
-
     valid_pred_y = [nn(valid_x[i]) for i in progress_iter(valid_x, "Validating")]
-
     valid_loss = neuron.mean_squared_error(train_y, valid_pred_y)
     valid_abs_error = neuron.mean_abs_error(valid_y, valid_pred_y)
 
     train_losses.append(train_abs_error)
-    train_loss_line = pyplot.plot(range(i+1), train_losses, color="red", label="Training Error")
+    pyplot.plot(range(i+1), train_losses, color="red", label="Training Error")
     valid_losses.append(valid_abs_error)
-    valid_loss_line = pyplot.plot(range(1, i+2), valid_losses, color="blue", label="Validation Error")
+    pyplot.plot(range(1, i+2), valid_losses, color="blue", label="Validation Error")
     pyplot.legend(["Training Error", "Validation Error"])
-
     pyplot.pause(0.001)
     print(f"\tValidation Error: {valid_abs_error}")
-
 
 train_pred_y = [nn(x) for x in train_x]
 train_loss = neuron.mean_squared_error(train_y, train_pred_y)
