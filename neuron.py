@@ -1,7 +1,6 @@
 import random
 import math
 from typing import Union
-#hi
 
 class Value:
     """A numerical value with backwards passing and gradient computation.

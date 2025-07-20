@@ -8,7 +8,7 @@ def test_data_loading():
     all_y = []
     
     try:
-        with open('dataset/cleaned_used_car_price_dataset.csv', 'r') as file:
+        with open('dataset/cleaned_student_performance_data.csv', 'r') as file:
             reader = csv.reader(file)
             header = next(reader)
             data = list(reader)

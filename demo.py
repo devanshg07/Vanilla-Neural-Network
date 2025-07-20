@@ -1,12 +1,13 @@
-import anndy
+import neuron
 import math, random, sys, csv
 from matplotlib import pyplot
 from tqdm import tqdm
 import grapher
 
 NUM_CLASSES = 5
-STEP_SIZE = 1  # Reduced learning rate for the different data characteristics
-NUM_EPOCHS = 50
+STEP_SIZE = 0.01  # Reduced learning rate for the different data characteristics
+NUM_EPOCHS = 100
+
 
 all_x = []
 all_y = []
@@ -21,15 +22,18 @@ def progress_iter(it, desc):
                 bar_format="{desc}: {percentage:0.2f}%|{bar}| {n_fmt}/{total_fmt} [{elapsed} < {remaining}]")
 
 
-with open('dataset/cleaned_used_car_price_dataset.csv', 'r') as file:
+with open('dataset/Student_performance_data.csv', 'r') as file:
     reader = csv.reader(file)
     header = next(reader)
     data = list(reader)
     print(f"Data size: {len(data)}")
     random.shuffle(data)
     for r in data:
-        all_x.append([float(i) for i in r[:-1]])  # All features except the last one (price)
-        all_y.append(float(r[-1]))  # Last column is the target (price)
+        # Features: Age, Ethnicity, StudyTimeWeekly, Absences, TotalActivities
+        # Skip StudentID (first column) and exclude GPA (target)
+        features = [float(i) for i in r[1:-1]]  # Skip StudentID, exclude GPA
+        all_x.append(features)
+        all_y.append(float(r[-1]))  # GPA is the last column
 print(f"Input size: {len(all_x[0])}")
 
 SAMPLE_SIZE = len(all_y)
@@ -39,8 +43,8 @@ train_y = all_y[:TRAIN_SPLIT]
 valid_x = all_x[TRAIN_SPLIT:]
 valid_y = all_y[TRAIN_SPLIT:]
 
-# Updated network architecture for 19 input features
-nn = anndy.MLP((19, "tanh"), (32, "relu"), (16, "tanh"), (8, "relu"), (1, "relu"))
+# Network architecture for 5 input features
+nn = neuron.MLP((5, "tanh"), (32, "relu"), (16, "tanh"), (8, "relu"), (1, "relu"))
 
 parameters = nn.get_parameters()
 print(f"Parameters: {len(parameters)}")
@@ -56,8 +60,8 @@ for i in range(NUM_EPOCHS):
 
     print(f"\nEpoch: {i}")
     train_pred_y = [nn(train_x[i]) for i in progress_iter(train_x, "Forward Pass")]  # Forward pass
-    train_loss = anndy.mean_squared_error(train_y, train_pred_y)
-    train_abs_error = anndy.mean_abs_error(train_y, train_pred_y)
+    train_loss = neuron.mean_squared_error(train_y, train_pred_y)
+    train_abs_error = neuron.mean_abs_error(train_y, train_pred_y)
 
     print(f"\tTraining Error: {train_abs_error}")
 
@@ -69,8 +73,8 @@ for i in range(NUM_EPOCHS):
 
     valid_pred_y = [nn(valid_x[i]) for i in progress_iter(valid_x, "Validating")]
 
-    valid_loss = anndy.mean_squared_error(train_y, valid_pred_y)
-    valid_abs_error = anndy.mean_abs_error(valid_y, valid_pred_y)
+    valid_loss = neuron.mean_squared_error(train_y, valid_pred_y)
+    valid_abs_error = neuron.mean_abs_error(valid_y, valid_pred_y)
 
     train_losses.append(train_abs_error)
     train_loss_line = pyplot.plot(range(i+1), train_losses, color="red", label="Training Error")
@@ -83,4 +87,4 @@ for i in range(NUM_EPOCHS):
 
 
 train_pred_y = [nn(x) for x in train_x]
-train_loss = anndy.mean_squared_error(train_y, train_pred_y)
+train_loss = neuron.mean_squared_error(train_y, train_pred_y)
