@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 NUM_CLASSES = 5
 STEP_SIZE = 0.03
-NUM_EPOCHS = 1
+NUM_EPOCHS = 100
 
 features_list = []
 targets_list = []
